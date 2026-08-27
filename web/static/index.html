@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Свечные графики MOEX</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>📈</text></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <span>Свечные графики <b>MOEX</b></span>
+    </div>
+    <div class="topbar-actions">
+      <button id="preset-save" class="btn btn-ghost" type="button" title="Сохранить период, таймфрейм и оформление в JSON">Сохранить пресет</button>
+      <label class="btn btn-ghost" for="preset-load">Загрузить пресет</label>
+      <input id="preset-load" type="file" accept=".json,application/json" hidden />
+      <button id="style-reset" class="btn btn-ghost" type="button">Сбросить оформление</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel" id="panel">
+      <section class="card">
+        <div class="tabs" role="tablist">
+          <button class="tab is-active" data-source="moex" role="tab" type="button">MOEX ISS</button>
+          <button class="tab" data-source="csv" role="tab" type="button">Импорт CSV</button>
+        </div>
+
+        <div class="source" data-source-pane="moex">
+          <label class="field">
+            <span class="field-label">Инструмент</span>
+            <div class="combo">
+              <input id="secid" type="text" placeholder="SBER, GAZP, IMOEX…" autocomplete="off" spellcheck="false" />
+              <ul id="secid-results" class="combo-list" hidden></ul>
+            </div>
+            <output id="secid-status" class="field-status"></output>
+          </label>
+
+          <details class="advanced">
+            <summary>Режим торгов</summary>
+            <label class="field">
+              <span class="field-label">Board</span>
+              <select id="board"><option value="">определить автоматически</option></select>
+            </label>
+          </details>
+
+          <label class="field">
+            <span class="field-label">Таймфрейм <em>источник: iss.moex.com</em></span>
+            <select id="interval"></select>
+          </label>
+        </div>
+
+        <div class="source" data-source-pane="csv" hidden>
+          <label class="field">
+            <span class="field-label">Файл CSV</span>
+            <input id="csv-file" type="file" accept=".csv,text/csv" />
+            <output id="csv-status" class="field-status">Обязательные колонки: open, high, low, close, begin</output>
+          </label>
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">Тикер (для заголовка)</span>
+              <input id="csv-ticker" type="text" placeholder="IMOEX" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span class="field-label">Название</span>
+              <input id="csv-name" type="text" placeholder="Индекс МосБиржи" autocomplete="off" />
+            </label>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field-label">Период</span>
+          <select id="period"></select>
+        </label>
+
+        <button id="load" class="btn btn-primary btn-block" type="button">Загрузить данные</button>
+        <output id="load-status" class="load-status"></output>
+      </section>
+
+      <section class="card title-card" id="title-card">
+        <div class="card-head">
+          <h2 class="card-title">Заголовок</h2>
+          <label class="switch" title="Показывать заголовок на графике">
+            <input id="title-visible" type="checkbox" checked />
+            <span>показывать</span>
+          </label>
+        </div>
+
+        <div class="segmented" role="tablist">
+          <button class="seg is-active" type="button" data-title-mode="auto" role="tab">Авто</button>
+          <button class="seg" type="button" data-title-mode="manual" role="tab">Свой текст</button>
+        </div>
+
+        <input id="title-input" class="title-input" type="text" spellcheck="false" autocomplete="off" />
+
+        <div class="title-toolbar">
+          <button class="tool" type="button" data-wrap="b" title="Полужирный"><b>Ж</b></button>
+          <button class="tool" type="button" data-wrap="i" title="Курсив"><i>К</i></button>
+          <button class="tool" type="button" data-insert="&lt;br&gt;" title="Перенос строки">↵</button>
+          <button class="tool" type="button" id="title-strip" title="Убрать все теги">T</button>
+          <span class="tool-divider" aria-hidden="true"></span>
+          <div id="title-chips" class="chips"></div>
+        </div>
+
+        <small id="title-hint" class="field-hint"></small>
+
+        <div class="preview-box" id="title-preview">—</div>
+
+        <div class="title-actions">
+          <button id="title-from-template" class="btn btn-ghost btn-sm" type="button" hidden>Подставить из шаблона</button>
+          <button id="title-reset" class="btn btn-ghost btn-sm" type="button">Вернуть шаблон</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Оформление</h2>
+        <div id="style-form" class="style-form"></div>
+      </section>
+    </aside>
+
+    <section class="stage">
+      <div class="stage-bar">
+        <div id="stage-info" class="stage-info">Выберите инструмент и нажмите «Загрузить данные».</div>
+        <div class="stage-actions">
+          <button id="render" class="btn" type="button" disabled>Отрисовать</button>
+          <button id="download" class="btn btn-primary" type="button" disabled>Скачать PNG</button>
+        </div>
+      </div>
+      <div class="stage-canvas">
+        <div id="chart"></div>
+        <div id="placeholder" class="placeholder">
+          <p>График появится здесь.</p>
+          <p class="muted">Данные: iss.moex.com или ваш CSV-файл. Оформление настраивается слева и сохраняется в пресет.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="/api/vendor/plotly.min.js"></script>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
