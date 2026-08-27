@@ -1,0 +1,50 @@
+services:
+  api:
+    build:
+      context: ./api
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.12-slim}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
+        APT_MIRROR: ${APT_MIRROR:-}
+    image: moex-charts-api:1.0.0
+    restart: unless-stopped
+    environment:
+      # Corporate TLS interception breaks certificate validation for
+      # iss.moex.com - set this to false on the work PC.
+      CHARTS_MOEX_VERIFY_SSL: ${CHARTS_MOEX_VERIFY_SSL:-true}
+      # Preferred alternative: mount the corporate root CA and point here.
+      CHARTS_MOEX_CA_BUNDLE: ${CHARTS_MOEX_CA_BUNDLE:-}
+      CHARTS_MOEX_BASE_URL: ${CHARTS_MOEX_BASE_URL:-https://iss.moex.com/iss}
+      CHARTS_MAX_CANDLES: ${CHARTS_MAX_CANDLES:-20000}
+      CHARTS_TIMEZONE: ${CHARTS_TIMEZONE:-Europe/Moscow}
+      # Outbound proxy, if the work PC requires one for iss.moex.com.
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
+    # To keep TLS verification on with a corporate root CA, uncomment this and
+    # set CHARTS_MOEX_CA_BUNDLE=/etc/ssl/corp-ca.crt in .env:
+    # volumes:
+    #   - ./certs/corp-root-ca.pem:/etc/ssl/corp-ca.crt:ro
+    expose:
+      - "8000"
+    networks:
+      - charts
+
+  web:
+    build:
+      context: ./web
+      args:
+        NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
+    image: moex-charts-web:1.0.0
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    networks:
+      - charts
+
+networks:
+  charts:
+    driver: bridge
