@@ -10,3 +10,7 @@ Makefile          text eol=lf
 *.png             binary
 *.ico             binary
 *.ipynb           binary
+
+# Test fixtures are sample files from the wild: keep their bytes exactly as
+# they arrived, CRLF and BOM included - that is part of what they test.
+api/tests/fixtures_data.csv -text
