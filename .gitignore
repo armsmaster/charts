@@ -1,0 +1,39 @@
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtualenvs (the one at the repo root is a Windows venv, ~hundreds of MB)
+.venv/
+venv/
+env/
+
+# --- Local configuration ----------------------------------------------------
+# .env holds this machine's Nexus URLs, proxy and TLS settings.
+# .env.example is committed instead.
+.env
+certs/
+
+# --- Editors / OS -----------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- Working material, not part of the application --------------------------
+# Design exploration and its sample data. Paths are anchored to the repo root
+# so the bundled default logo (api/src/moexcharts/assets/wm.png) and the test
+# fixture (api/tests/fixtures_data.csv) are still tracked.
+/chart.ipynb
+/data.csv
+/newplot.png
+/wm.png
+/_to_delete/
+/moex-charts.zip
+
+# Chart exports and saved presets land here during normal use.
+/out/
+*.png.tmp

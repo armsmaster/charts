@@ -1,0 +1,16 @@
+# Runtime dependencies. Pinned so the Nexus-proxied pip index resolves
+# deterministically on the deployment host.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.0
+httpx==0.28.1
+python-multipart==0.0.20
+python-dateutil==2.9.0.post0
+
+# Charting. plotly 5.x also ships the bundled plotly.min.js that the web UI
+# loads from /api/vendor/plotly.min.js, so the browser needs no CDN access.
+plotly==5.24.1
+# kaleido 0.2.1 is self-contained (no system Chrome required) -> works offline.
+kaleido==0.2.1
+Pillow==11.0.0
