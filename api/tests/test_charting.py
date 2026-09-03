@@ -222,6 +222,39 @@ class TestWatermark:
         assert len(uri) < 20_000
 
 
+class TestLocale:
+    def test_vendored_module_registers_the_russian_dictionary(self):
+        from moexcharts.charting.locale import locale_js
+
+        js = locale_js()
+        assert 'moduleType:"locale"' in js and 'name:"ru"' in js
+        # the datetime-axis format block: month tables plus day-first ordering
+        # and a decimal comma - the things English gets wrong for a MOEX chart.
+        assert "months:[" in js and "shortMonths:[" in js
+        assert 'date:"%d.%m.%Y"' in js and 'decimal:","' in js
+        # month names are present, shipped as \u escapes ("Я..." == "Январь")
+        assert "\\u042f\\u043d\\u0432\\u0430\\u0440\\u044c" in js
+
+    def test_kaleido_bundle_registers_the_locale_and_shims_toimage(self):
+        from pathlib import Path
+
+        from moexcharts.charting.locale import kaleido_plotlyjs
+
+        bundle = Path(kaleido_plotlyjs()).read_text(encoding="utf-8")
+        assert "Plotly" in bundle  # the plotly.js source itself
+        assert 'name:"ru"' in bundle  # locale module appended
+        # the toImage shim - Kaleido's entry point - forces the locale
+        assert "Plotly.toImage = function" in bundle and "locale: 'ru'" in bundle
+
+    def test_figure_spec_is_locale_agnostic(self):
+        # Localisation is a Plotly *config* option applied by each renderer, not
+        # something baked into the figure - so the spec must not depend on it.
+        spec = FigureBuilder(default_watermark=lambda: "/l.png").build_spec(
+            make_series(), ChartStyle()
+        )
+        assert "locale" not in spec.get("layout", {})
+
+
 def test_empty_series_is_rejected_at_construction():
     with pytest.raises(EmptySeriesError):
         CandleSeries(candles=(), source="csv")

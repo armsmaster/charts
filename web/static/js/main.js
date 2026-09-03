@@ -258,6 +258,9 @@ async function renderChart() {
     // annotations) from the spec, and a full replace is what reliably clears a
     // watermark or note the user has just switched off.
     await Plotly.newPlot(dom.chart, figure.data, figure.layout, {
+      // Russian month/day names on the datetime axis; dictionary registered by
+      // /api/vendor/plotly-locale-ru.js, loaded before this module.
+      locale: 'ru',
       displaylogo: false,
       responsive: false,
       scrollZoom: true,
