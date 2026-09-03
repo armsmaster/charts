@@ -191,3 +191,13 @@ class TestCharts:
         response = client.get("/api/vendor/plotly.min.js")
         assert response.status_code == 200
         assert "plotly" in response.text[:2000].lower()
+
+    def test_vendored_russian_locale_is_served(self, client):
+        # The pip plotly package has no ru locale and the deploy host has no
+        # CDN, so the browser gets the datetime-axis month names from here.
+        response = client.get("/api/vendor/plotly-locale-ru.js")
+        assert response.status_code == 200
+        assert "javascript" in response.headers["content-type"]
+        assert 'moduleType:"locale"' in response.text and 'name:"ru"' in response.text
+        # the datetime-axis format block, day-first as Russian expects
+        assert "months:[" in response.text and 'date:"%d.%m.%Y"' in response.text

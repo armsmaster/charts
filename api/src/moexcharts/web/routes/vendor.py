@@ -20,3 +20,17 @@ async def plotly_js() -> Response:
         media_type="application/javascript",
         headers={"Cache-Control": "public, max-age=86400"},
     )
+
+
+@router.get("/plotly-locale-ru.js")
+async def plotly_locale_ru() -> Response:
+    """Russian locale module for plotly.js - not in the pip package, and the
+    deploy host has no CDN. Loaded after ``plotly.min.js`` so it self-registers.
+    """
+    from ...charting.locale import locale_js
+
+    return Response(
+        content=locale_js(),
+        media_type="application/javascript",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )

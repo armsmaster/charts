@@ -55,6 +55,12 @@ APT_MIRROR=http://nexus.corp/repository/debian-proxy
 `plotly` через `/api/vendor/plotly.min.js`. Никаких npm и внешних сетей для
 фронтенда не требуется.
 
+Русская локаль оси времени — единственный вендоренный вручную файл
+(`api/src/moexcharts/assets/plotly-locale-ru.js`, ~1 КБ): в пакете `plotly`
+её нет, а хост без CDN. Браузер грузит её из `/api/vendor/plotly-locale-ru.js`
+и передаёт `{locale: "ru"}` в `Plotly.newPlot`; для серверного PNG та же
+локаль вклеивается в бандл, которым питается Kaleido.
+
 ### Доступ к iss.moex.com без проверки SSL
 
 ```dotenv
@@ -179,5 +185,5 @@ make test                                    # в контейнере
 cd api && pip install -r requirements-dev.txt && PYTHONPATH=src pytest -q
 ```
 
-107 тестов, все офлайн: обращения к ISS перехватываются подставным
+111 тестов, все офлайн: обращения к ISS перехватываются подставным
 httpx-транспортом, так что набор гоняется и на изолированной машине.
